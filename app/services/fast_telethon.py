@@ -174,7 +174,10 @@ class FastDownloader:
                                     await self.progress_callback(current_dl, self.file_size)
                                 else:
                                     self.progress_callback(current_dl, self.file_size)
-                            except Exception:
+                            except (asyncio.CancelledError, Exception) as cb_err:
+                                # Re-raise cancellations; silently ignore other callback errors
+                                if isinstance(cb_err, asyncio.CancelledError) or type(cb_err).__name__ == "CancelledDownload":
+                                    raise
                                 pass
 
                     queue.task_done()
@@ -230,6 +233,16 @@ async def fast_download(
         logger.warning(
             f"Fast parallel download failed ({e}), falling back to standard Telethon download_media..."
         )
+        # Remove the pre-allocated / partially-written file so that the
+        # standard fallback starts from scratch instead of appearing as a
+        # second download to the user.
+        out_path = Path(out_file)
+        if out_path.exists():
+            try:
+                out_path.unlink()
+                logger.info("Removed incomplete fast-download file before fallback: %s", out_path)
+            except Exception as del_err:
+                logger.warning("Could not remove incomplete file before fallback: %s", del_err)
         # Fallback to standard Telethon download
         res = await client.download_media(
             location,
