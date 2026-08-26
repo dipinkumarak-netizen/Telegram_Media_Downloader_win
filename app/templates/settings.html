@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Settings · Telegram Media Downloader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d131f;
+      --card: #151d2d;
+      --border: #243147;
+      --muted: #8e9fb5;
+      --text: #eef4fc;
+      --good: #38d39f;
+      --bad: #f87171;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    main {
+      max-width: 960px;
+      margin: auto;
+      padding: 24px 20px;
+    }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { font-size: 22px; margin: 0; font-weight: 700; }
+    h2 { font-size: 16px; margin: 0 0 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #d1d5db;
+    }
+    label span.hint {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    input[type=text], input[type=number], input[type=password], input[type=tel], select {
+      width: 100%;
+      padding: 9px 12px;
+      margin-top: 6px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #090e17;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .checkbox-label input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      cursor: pointer;
+    }
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: #223048; color: #eef4fc; border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #2c3e5c; }
+    .btn-danger { background: var(--bad); color: #fff; }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .badge-good { background: rgba(56, 211, 159, 0.15); color: var(--good); border: 1px solid rgba(56, 211, 159, 0.3); }
+    .badge-bad { background: rgba(248, 113, 113, 0.15); color: var(--bad); border: 1px solid rgba(248, 113, 113, 0.3); }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .toast.good { border-left-color: var(--good); }
+    .toast.bad { border-left-color: var(--bad); }
+    
+    .source-list {
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      background: #090e17;
+      margin-top: 10px;
+    }
+    .source-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .source-item:hover { background: rgba(255,255,255,0.03); }
+    .source-item input { margin: 0; width: 16px; height: 16px; cursor: pointer; }
+    .disk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .disk-card {
+      border: 1px solid var(--border);
+      background: #090e17;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .disk-card:hover { border-color: var(--accent); }
+    .disk-card.selected { border-color: var(--good); background: rgba(56, 211, 159, 0.05); }
+    .disk-card strong { display: block; font-size: 14px; margin-bottom: 4px; }
+    .disk-card span { font-size: 12px; color: var(--muted); }
+    
+    @media(max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <div>
+      <h1>⚙️ Application Settings</h1>
+      <span class="muted" style="font-size:12px; display: block;">Unified Single-Page Configuration for Windows 11</span>
+      <span class="muted" style="font-size: 10.5px; opacity: 0.75; display: block; margin-top: 2px;">Created by : Dipin a k</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <span id="lan-badge" class="badge" style="background:#1e293b;border:1px solid #334155;color:#38bdf8;cursor:pointer;font-family:monospace;" title="Click to copy LAN URL for other devices" onclick="copyLanUrl()">🌐 LAN: <span id="lan-url-text">...</span> 📋</span>
+      <a href="/" class="btn btn-secondary">⬅️ Back to Dashboard</a>
+      <button class="btn btn-secondary" id="logout-btn" style="display:none">Log Out</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Settings saved successfully!</div>
+
+  <!-- SECTION 1: TELEGRAM API -->
+  <section class="card">
+    <h2>
+      <span>🔑 Telegram API Credentials</span>
+      <span id="api-status-badge" class="badge badge-bad">Not Configured</span>
+    </h2>
+    <p class="muted" style="margin-top:0;font-size:12px;">
+      Obtain your API credentials from <a href="https://my.telegram.org" target="_blank" style="color:var(--accent)">my.telegram.org</a> (API Development tools).
+    </p>
+    <div class="grid-2">
+      <label>
+        Telegram API ID
+        <input type="number" id="api-id" placeholder="e.g. 12345678">
+      </label>
+      <label>
+        Telegram API Hash
+        <input type="password" id="api-hash" placeholder="Enter API Hash (leave blank if unchanged)">
+      </label>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="save-api-btn">Save Telegram API</button>
+    </div>
+  </section>
+
+  <!-- SECTION 2: TELEGRAM LOGIN -->
+  <section class="card">
+    <h2>
+      <span>📱 Telegram Account Login</span>
+      <span id="tg-auth-badge" class="badge badge-bad">Disconnected</span>
+    </h2>
+
+    <div id="tg-connected-panel" style="display:none;">
+      <p style="color:var(--good);margin:0 0 6px;font-weight:600;">● Connected to Telegram</p>
+      <p style="margin:0 0 12px;" class="muted">
+        Logged in as: <strong id="tg-name" style="color:#fff">—</strong> (<span id="tg-username">—</span>) <span id="tg-phone-display"></span>
+      </p>
+      <button class="btn btn-danger" id="tg-disconnect-btn">Disconnect Telegram Account</button>
+    </div>
+
+    <div id="tg-login-panel">
+      <div id="tg-step-phone">
+        <label>
+          Phone Number (International format with country code)
+          <span class="hint">e.g. +919876543210 or +12025550123</span>
+          <input type="tel" id="tg-phone" placeholder="+919876543210">
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="tg-send-code-btn">Send Login Code (OTP)</button>
+        </div>
+      </div>
+
+      <div id="tg-step-code" style="display:none;margin-top:14px;">
+        <label>
+          Telegram Login Code
+          <span class="hint">Enter the code sent to your Telegram app or SMS</span>
+          <input type="text" id="tg-code" placeholder="12345">
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="tg-verify-code-btn">Verify Code</button>
+          <button class="btn btn-secondary" id="tg-cancel-code-btn">Cancel</button>
+        </div>
+      </div>
+
+      <div id="tg-step-password" style="display:none;margin-top:14px;">
+        <label>
+          Two-Step Verification Password (2FA)
+          <span class="hint">Enter your cloud password for Telegram</span>
+          <input type="password" id="tg-password" placeholder="Your Telegram 2FA Password">
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="tg-verify-pass-btn">Verify Password</button>
+          <button class="btn btn-secondary" id="tg-cancel-pass-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: MONITORED SOURCES -->
+  <section class="card">
+    <h2>
+      <span>📢 Monitored Channels & Groups</span>
+      <span id="sources-badge" class="badge badge-good">0 Selected</span>
+    </h2>
+    <p class="muted" style="margin-top:0;font-size:12px;">
+      Select which Telegram chats, channels, or supergroups the downloader will monitor for media files.
+    </p>
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <input type="text" id="source-search" placeholder="🔍 Search channels and groups…" style="flex:1;min-width:200px;margin:0;">
+      <button class="btn btn-secondary" id="sources-refresh-btn">🔄 Refresh Channels</button>
+      <button class="btn btn-secondary" id="sources-select-all">Select All</button>
+      <button class="btn btn-secondary" id="sources-clear-all">Clear All</button>
+    </div>
+    <div class="source-list" id="sources-container">
+      <div class="muted" style="padding:16px;text-align:center;">Authorize Telegram above to load your channels and groups.</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="save-sources-btn">Save Monitored Sources</button>
+    </div>
+  </section>
+
+  <!-- SECTION 4: STORAGE & DIRECTORIES -->
+  <section class="card">
+    <h2>
+      <span>📁 Storage & Download Directories</span>
+      <span class="badge badge-good" id="storage-status-badge">Configured</span>
+    </h2>
+    <p class="muted" style="margin-top:0;font-size:12px;">
+      Files will be automatically sorted into categories (movies, tv, videos, audio, images, documents, archives, other).
+    </p>
+    <div class="grid-2">
+      <label>
+        Download Folder Path
+        <input type="text" id="download-dir-input" placeholder="C:\Users\...\Downloads\TelegramDownloads">
+      </label>
+      <label>
+        Incomplete / Temp Folder Path
+        <input type="text" id="temp-dir-input" placeholder="C:\Users\...\AppData\Local\...\tmp">
+      </label>
+    </div>
+
+    <label style="margin-top:10px;">Available Disks / Locations:</label>
+    <div class="disk-grid" id="disks-container">
+      <div class="muted">Loading disk drives…</div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="save-storage-btn">Save Storage Settings</button>
+    </div>
+  </section>
+
+  <!-- SECTION 5: DOWNLOAD PREFERENCES -->
+  <section class="card">
+    <h2>⚙️ Download & Performance Preferences</h2>
+    <div class="grid-2">
+      <label>
+        Concurrent Downloads
+        <span class="hint">Simultaneous parallel downloads (1 - 16)</span>
+        <input type="number" id="pref-concurrent" min="1" max="16" value="2">
+      </label>
+      <label>
+        Max File Size Limit (GB)
+        <span class="hint">0 = Unlimited download size</span>
+        <input type="number" id="pref-max-size" step="0.5" min="0" value="0">
+      </label>
+      <label>
+        Min Free Disk Space (GB)
+        <span class="hint">Pause downloads if disk space drops below this</span>
+        <input type="number" id="pref-min-space" step="0.5" min="0" value="2">
+      </label>
+      <label>
+        Bandwidth Limit (Mbps)
+        <span class="hint">0 = Unlimited download speed</span>
+        <input type="number" id="pref-bandwidth" step="1" min="0" value="0">
+      </label>
+      <label>
+        Max Retry Attempts
+        <span class="hint">Auto-retry attempts on transient network failures</span>
+        <input type="number" id="pref-retries" min="0" max="50" value="5">
+      </label>
+      <div style="display:flex;align-items:center;padding-top:20px;">
+        <label class="checkbox-label">
+          <input type="checkbox" id="pref-replies">
+          Send Status Replies in Telegram Chat
+        </label>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="save-preferences-btn">Save Preferences</button>
+    </div>
+  </section>
+
+  <!-- SECTION 6: JELLYFIN INTEGRATION -->
+  <section class="card">
+    <h2>🎬 Jellyfin Media Server (Optional)</h2>
+    <p class="muted" style="margin-top:0;font-size:12px;">
+      Automatically trigger Jellyfin library scan when media files finish downloading.
+    </p>
+    <label class="checkbox-label" style="margin-bottom:14px;">
+      <input type="checkbox" id="jellyfin-enabled">
+      Enable Jellyfin Library Refresh
+    </label>
+    <div class="grid-2">
+      <label>
+        Jellyfin Server URL
+        <input type="text" id="jellyfin-url" placeholder="http://localhost:8096">
+      </label>
+      <label>
+        Jellyfin API Key
+        <input type="password" id="jellyfin-key" placeholder="Enter API Key (leave blank if unchanged)">
+      </label>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="save-jellyfin-btn">Save Jellyfin</button>
+      <button class="btn btn-secondary" id="test-jellyfin-btn">Test Connection</button>
+      <span id="jellyfin-test-result" style="font-size:13px;"></span>
+    </div>
+  </section>
+
+  <!-- SECTION 7: ADMIN SECURITY -->
+  <section class="card">
+    <h2>🛡️ Dashboard Password & Security (Optional)</h2>
+    <p class="muted" style="margin-top:0;font-size:12px;">
+      Protect this web dashboard with a password when accessing from other computers on your network.
+    </p>
+    <div class="grid-2">
+      <label>
+        Admin Username
+        <input type="text" id="admin-user" placeholder="admin">
+      </label>
+      <label>
+        Admin Password
+        <input type="password" id="admin-pass" placeholder="Enter at least 12 characters">
+      </label>
+      <label>
+        Confirm Password
+        <input type="password" id="admin-confirm-pass" placeholder="Re-enter password">
+      </label>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="save-admin-btn">Set Admin Credentials</button>
+    </div>
+  </section>
+</main>
+
+<script>
+let csrf = "";
+let sourcesData = [];
+
+function showToast(msg, isBad = false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast ${isBad ? "bad" : "good"}`;
+  t.style.display = "block";
+  setTimeout(() => { t.style.display = "none"; }, 3500);
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s || "";
+  return d.innerHTML;
+}
+
+const size = n => {
+  if (!n || n <= 0) return "0 B";
+  const u = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(Math.floor(Math.log(n) / Math.log(1024)), 4);
+  return `${(n / (1024 ** i)).toFixed(i ? 1 : 0)} ${u[i]}`;
+};
+
+async function api(url, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (csrf) headers["X-CSRF-Token"] = csrf;
+  const res = await fetch(url, { ...options, headers });
+  if (res.status === 401) {
+    location.assign("/login?next=/settings");
+    throw new Error("Unauthorized");
+  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail?.message || data.detail || "Request failed");
+  return data;
+}
+
+function copyLanUrl() {
+  const url = document.getElementById("lan-url-text").innerText;
+  if (url && url !== "..." && url !== "Loading...") {
+    navigator.clipboard.writeText(url).then(() => {
+      alert("✅ Copied LAN URL to clipboard:\n" + url + "\n\nOpen this address in any browser on other computers or phones on the same Wi-Fi/network!");
+    }).catch(() => {
+      prompt("Copy LAN URL:", url);
+    });
+  }
+}
+
+async function loadAll() {
+  try {
+    const s = await api("/api/setup/status");
+    csrf = s.csrf_token || "";
+
+    try {
+      const appStatus = await fetch("/api/status").then(r => r.json());
+      if (appStatus.lan_url) {
+        document.getElementById("lan-url-text").textContent = appStatus.lan_url;
+      }
+    } catch(e) {}
+
+    if (s.admin_configured) {
+      document.getElementById("logout-btn").style.display = "inline-flex";
+    }
+
+    // API
+    if (s.telegram_api_id) document.getElementById("api-id").value = s.telegram_api_id;
+    if (s.telegram_api_configured) {
+      document.getElementById("api-status-badge").className = "badge badge-good";
+      document.getElementById("api-status-badge").textContent = "Configured";
+    }
+
+    // Telegram Auth
+    if (s.telegram_authorized) {
+      document.getElementById("tg-auth-badge").className = "badge badge-good";
+      document.getElementById("tg-auth-badge").textContent = "Connected";
+      document.getElementById("tg-connected-panel").style.display = "block";
+      document.getElementById("tg-login-panel").style.display = "none";
+      document.getElementById("tg-name").textContent = s.telegram_account?.display_name || "Telegram User";
+      document.getElementById("tg-username").textContent = s.telegram_account?.username ? `@${s.telegram_account.username}` : "";
+      document.getElementById("tg-phone-display").textContent = s.telegram_account?.phone || "";
+    } else {
+      document.getElementById("tg-auth-badge").className = "badge badge-bad";
+      document.getElementById("tg-auth-badge").textContent = "Disconnected";
+      document.getElementById("tg-connected-panel").style.display = "none";
+      document.getElementById("tg-login-panel").style.display = "block";
+    }
+
+    // Storage
+    document.getElementById("download-dir-input").value = s.download_dir || "";
+    document.getElementById("temp-dir-input").value = s.temp_dir || "";
+
+    // Preferences
+    if (s.preferences) {
+      document.getElementById("pref-concurrent").value = s.preferences.concurrent_downloads || 2;
+      document.getElementById("pref-max-size").value = s.preferences.max_file_size_gb || 0;
+      document.getElementById("pref-min-space").value = s.preferences.min_free_space_gb || 2;
+      document.getElementById("pref-bandwidth").value = s.preferences.bandwidth_limit_mbps || 0;
+      document.getElementById("pref-retries").value = s.preferences.max_retries || 5;
+      document.getElementById("pref-replies").checked = Boolean(s.preferences.status_replies_enabled);
+    }
+
+    // Jellyfin
+    if (s.jellyfin) {
+      document.getElementById("jellyfin-enabled").checked = Boolean(s.jellyfin.enabled);
+      document.getElementById("jellyfin-url").value = s.jellyfin.url || "";
+    }
+
+    // Disks & Sources
+    await Promise.all([loadDisks(), loadSources()]);
+  } catch (e) {
+    if (e.message !== "Unauthorized") showToast(e.message, true);
+  }
+}
+
+async function loadDisks() {
+  try {
+    const data = await api("/api/storage/disks");
+    const container = document.getElementById("disks-container");
+    if (!data.disks || data.disks.length === 0) {
+      container.innerHTML = '<div class="muted">No disk drives detected.</div>';
+      return;
+    }
+    const currentPath = document.getElementById("download-dir-input").value;
+    container.innerHTML = data.disks.map((d, idx) => `
+      <div class="disk-card ${currentPath.startsWith(d.mount_path) ? 'selected' : ''}" onclick="selectDisk('${esc(d.mount_path)}')">
+        <strong>${esc(d.display_name)}</strong>
+        <span>Path: ${esc(d.mount_path)}</span><br>
+        <span>Free: ${size(d.free_bytes)} / ${size(d.total_bytes)}</span>
+      </div>
+    `).join("");
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function selectDisk(path) {
+  document.getElementById("download-dir-input").value = path;
+  loadDisks();
+}
+
+async function loadSources(refresh = false) {
+  try {
+    const data = await api(`/api/telegram/sources${refresh ? "?refresh=true" : ""}`);
+    sourcesData = data.sources || [];
+    renderSources();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderSources() {
+  const container = document.getElementById("sources-container");
+  const query = (document.getElementById("source-search").value || "").toLowerCase();
+  const filtered = sourcesData.filter(s => (s.title || "").toLowerCase().includes(query));
+
+  const selectedCount = sourcesData.filter(s => s.selected).length;
+  document.getElementById("sources-badge").textContent = `${selectedCount} Selected`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">No channels found. Click "Refresh Channels" to discover dialogs.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(s => `
+    <label class="source-item">
+      <input type="checkbox" data-src-id="${s.id}" ${s.selected ? "checked" : ""}>
+      <div style="flex:1">
+        <strong>${esc(s.title)}</strong>
+        <span class="muted" style="font-size:11px;margin-left:6px;text-transform:capitalize;">(${esc(s.type || "channel")})</span>
+      </div>
+    </label>
+  `).join("");
+
+  container.querySelectorAll("[data-src-id]").forEach(input => {
+    input.onchange = () => {
+      const src = sourcesData.find(x => String(x.id) === input.dataset.srcId);
+      if (src) src.selected = input.checked;
+      const count = sourcesData.filter(x => x.selected).length;
+      document.getElementById("sources-badge").textContent = `${count} Selected`;
+    };
+  });
+}
+
+document.getElementById("source-search").oninput = renderSources;
+
+document.getElementById("sources-select-all").onclick = () => {
+  sourcesData.forEach(s => s.selected = true);
+  renderSources();
+};
+
+document.getElementById("sources-clear-all").onclick = () => {
+  sourcesData.forEach(s => s.selected = false);
+  renderSources();
+};
+
+document.getElementById("sources-refresh-btn").onclick = async () => {
+  try {
+    showToast("Refreshing Telegram channels…");
+    await loadSources(true);
+    showToast("Telegram channels refreshed!");
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+// SAVE API
+document.getElementById("save-api-btn").onclick = async () => {
+  try {
+    const apiId = Number(document.getElementById("api-id").value);
+    const apiHash = document.getElementById("api-hash").value;
+    if (!apiId) throw new Error("Please enter a valid Telegram API ID.");
+    await api("/api/setup/telegram-config", {
+      method: "POST",
+      body: JSON.stringify({ api_id: apiId, api_hash: apiHash })
+    });
+    document.getElementById("api-hash").value = "";
+    showToast("Telegram API credentials saved!");
+    loadAll();
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+// TELEGRAM AUTH
+document.getElementById("tg-send-code-btn").onclick = async () => {
+  try {
+    const phone = document.getElementById("tg-phone").value.trim();
+    if (!phone) throw new Error("Please enter your phone number.");
+    showToast("Requesting Telegram login code…");
+    await api("/api/telegram/auth/send-code", {
+      method: "POST",
+      body: JSON.stringify({ phone })
+    });
+    document.getElementById("tg-step-phone").style.display = "none";
+    document.getElementById("tg-step-code").style.display = "block";
+    showToast("Code sent! Enter the code received from Telegram.");
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+document.getElementById("tg-verify-code-btn").onclick = async () => {
+  try {
+    const code = document.getElementById("tg-code").value.trim();
+    if (!code) throw new Error("Please enter the login code.");
+    showToast("Verifying code…");
+    const data = await api("/api/telegram/auth/verify-code", {
+      method: "POST",
+      body: JSON.stringify({ code })
+    });
+    if (data.password_required) {
+      document.getElementById("tg-step-code").style.display = "none";
+      document.getElementById("tg-step-password").style.display = "block";
+      showToast("Two-Step Verification (2FA) is enabled. Enter your password.");
+    } else {
+      showToast("Telegram connected successfully!");
+      loadAll();
+    }
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+document.getElementById("tg-verify-pass-btn").onclick = async () => {
+  try {
+    const password = document.getElementById("tg-password").value;
+    if (!password) throw new Error("Please enter your 2FA password.");
+    showToast("Verifying password…");
+    await api("/api/telegram/auth/verify-password", {
+      method: "POST",
+      body: JSON.stringify({ password })
+    });
+    showToast("Telegram connected successfully!");
+    loadAll();
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+document.getElementById("tg-cancel-code-btn").onclick = async () => {
+  await api("/api/telegram/auth/cancel", { method: "POST" });
+  document.getElementById("tg-step-code").style.display = "none";
+  document.getElementById("tg-step-phone").style.display = "block";
+};
+
+document.getElementById("tg-cancel-pass-btn").onclick = async () => {
+  await api("/api/telegram/auth/cancel", { method: "POST" });
+  document.getElementById("tg-step-password").style.display = "none";
+  document.getElementById("tg-step-phone").style.display = "block";
+};
+
+document.getElementById("tg-disconnect-btn").onclick = async () => {
+  if (!confirm("Are you sure you want to disconnect your Telegram account?")) return;
+  await api("/api/telegram/auth/cancel", { method: "POST" });
+  showToast("Disconnected Telegram account.");
+  loadAll();
+};
+
+// SAVE SOURCES
+document.getElementById("save-sources-btn").onclick = async () => {
+  try {
+    const selectedIds = sourcesData.filter(s => s.selected).map(s => s.id);
+    await api("/api/settings/telegram-sources", {
+      method: "PUT",
+      body: JSON.stringify({ source_ids: selectedIds })
+    });
+    showToast("Monitored Telegram sources saved!");
+    loadAll();
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+// SAVE STORAGE
+document.getElementById("save-storage-btn").onclick = async () => {
+  try {
+    const dlDir = document.getElementById("download-dir-input").value.trim();
+    const tempDir = document.getElementById("temp-dir-input").value.trim();
+    if (!dlDir) throw new Error("Please specify a download folder.");
+    await api("/api/settings/storage", {
+      method: "POST",
+      body: JSON.stringify({ download_dir: dlDir, temp_dir: tempDir || null })
+    });
+    showToast("Storage settings saved!");
+    loadAll();
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+// SAVE PREFERENCES
+document.getElementById("save-preferences-btn").onclick = async () => {
+  try {
+    const payload = {
+      concurrent_downloads: Number(document.getElementById("pref-concurrent").value),
+      max_file_size_gb: Number(document.getElementById("pref-max-size").value),
+      min_free_space_gb: Number(document.getElementById("pref-min-space").value),
+      bandwidth_limit_mbps: Number(document.getElementById("pref-bandwidth").value),
+      max_retries: Number(document.getElementById("pref-retries").value),
+      status_replies_enabled: document.getElementById("pref-replies").checked
+    };
+    await api("/api/settings/preferences", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    showToast("Download preferences saved!");
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+// JELLYFIN
+document.getElementById("save-jellyfin-btn").onclick = async () => {
+  try {
+    const enabled = document.getElementById("jellyfin-enabled").checked;
+    const url = document.getElementById("jellyfin-url").value.trim();
+    const key = document.getElementById("jellyfin-key").value;
+    await api("/api/setup/jellyfin", {
+      method: "POST",
+      body: JSON.stringify({ enabled, url: url || null, api_key: key || null })
+    });
+    document.getElementById("jellyfin-key").value = "";
+    showToast("Jellyfin settings saved!");
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+document.getElementById("test-jellyfin-btn").onclick = async () => {
+  const resultSpan = document.getElementById("jellyfin-test-result");
+  try {
+    resultSpan.textContent = "Testing…";
+    resultSpan.style.color = "var(--muted)";
+    const url = document.getElementById("jellyfin-url").value.trim();
+    const key = document.getElementById("jellyfin-key").value;
+    const data = await api("/api/setup/jellyfin/test", {
+      method: "POST",
+      body: JSON.stringify({ enabled: true, url, api_key: key || null })
+    });
+    if (data.ok) {
+      resultSpan.textContent = "✅ Connection succeeded!";
+      resultSpan.style.color = "var(--good)";
+    } else {
+      resultSpan.textContent = "❌ Connection failed.";
+      resultSpan.style.color = "var(--bad)";
+    }
+  } catch (e) {
+    resultSpan.textContent = `❌ ${e.message}`;
+    resultSpan.style.color = "var(--bad)";
+  }
+};
+
+// ADMIN CREDENTIALS
+document.getElementById("save-admin-btn").onclick = async () => {
+  try {
+    const username = document.getElementById("admin-user").value.trim();
+    const password = document.getElementById("admin-pass").value;
+    const confirmPass = document.getElementById("admin-confirm-pass").value;
+    if (!username || !password) throw new Error("Username and password are required.");
+    const data = await api("/api/setup/admin", {
+      method: "POST",
+      body: JSON.stringify({ username, password, password_confirmation: confirmPass })
+    });
+    csrf = data.csrf_token;
+    document.getElementById("admin-pass").value = "";
+    document.getElementById("admin-confirm-pass").value = "";
+    showToast("Admin credentials configured!");
+    loadAll();
+  } catch (e) {
+    showToast(e.message, true);
+  }
+};
+
+document.getElementById("logout-btn").onclick = async () => {
+  await api("/api/admin/logout", { method: "POST" });
+  location.assign("/login");
+};
+
+loadAll();
+</script>
+</body>
+</html>
+
