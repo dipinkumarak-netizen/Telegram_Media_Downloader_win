@@ -52,6 +52,9 @@ def build():
         "--hidden-import=telethon",
         "--hidden-import=telethon.tl.types",
         "--hidden-import=jinja2",
+        "--hidden-import=markupsafe",
+        "--collect-all=jinja2",
+        "--collect-all=starlette",
         "--hidden-import=pydantic_settings",
         str(root / "launcher.py"),
     ]
